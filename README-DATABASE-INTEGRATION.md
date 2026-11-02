@@ -98,3 +98,37 @@ Before staging, verify `.env.local` is ignored by `.gitignore`. Never commit sec
 | `/api/correlations` | POST | Link IOC to incident; installed MySQL trigger should create alert |
 | `/api/threat-feeds` | GET | MongoDB records and aggregation by source |
 | `/api/threat-feeds` | POST | Add a flexible MongoDB threat-feed record |
+
+
+## Authentication and analyst account access
+
+Authentication is now backed by the MySQL `users` and `roles` tables:
+
+- Registration creates an **Analyst** account in MySQL. Passwords are bcrypt-hashed; plaintext passwords are not stored.
+- Sign-in checks the saved password hash and account status, then sets an HttpOnly, SameSite session cookie (8-hour lifetime).
+- Protected application pages and API routes require a valid session.
+- Only a signed-in **Admin** can access `/admin/analysts` and `/api/admin/analysts`; the endpoint checks the role server-side.
+- Public sign-up never allows choosing the Admin role.
+
+Install the new dependencies after pulling the repository:
+
+```powershell
+npm install
+```
+
+Add `AUTH_SECRET` to your local `.env.local`. Use a unique random secret of at least 32 characters; do not commit it. Restart the development server after editing environment variables.
+
+### Set your own account as Admin
+
+1. Start the app and use **Create Account** to register your own account.
+2. In MySQL Workbench, run the following statement after replacing the email with the email you registered:
+
+```sql
+UPDATE users
+SET role_id = (SELECT role_id FROM roles WHERE role_name = 'Admin' LIMIT 1)
+WHERE email = 'your-own-email@example.com';
+```
+
+3. Sign out (or clear the site's cookies), sign in again so the new role is in the session, and open `/admin/analysts`.
+
+This Admin page shows analyst accounts only. Analysts cannot access it; the server returns 403 for the protected API. Keep `.env.local` and all passwords/secrets private.
