@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 
 type Incident = { incident_id: number; title: string; severity: string; status: string; created_at?: string; reported_by?: string; ioc_count?: number; affected_asset_count?: number; alert_count?: number; };
@@ -12,7 +12,7 @@ function severityClass(value: string) {
   return "border-slate-700 bg-slate-800 text-slate-300";
 }
 
-export default function Incidents() {
+function IncidentsContent() {
   const params = useSearchParams();
   const requestedId = params.get("id");
   const [incidents, setIncidents] = useState<Incident[]>([]);
@@ -65,5 +65,18 @@ export default function Incidents() {
         </section>
       </div>
     </main>
+  );
+}
+export default function Incidents() {
+  return (
+    <Suspense
+      fallback={
+        <main className="mx-auto min-h-screen max-w-7xl px-5 py-8 md:px-8">
+          <p className="text-sm text-slate-400">Loading incidents...</p>
+        </main>
+      }
+    >
+      <IncidentsContent />
+    </Suspense>
   );
 }

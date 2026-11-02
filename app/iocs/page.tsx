@@ -8,7 +8,6 @@ type IOC = {
   ioc_type: "IP" | "Domain" | "URL" | "Hash";
   severity: "Low" | "Medium" | "High" | "Critical";
   source: string;
-  feed_name?: string | null;
 };
 
 export default function IOCManagement() {
@@ -16,6 +15,7 @@ export default function IOCManagement() {
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [editingId, setEditingId] = useState<number | null>(null);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
@@ -26,7 +26,6 @@ export default function IOCManagement() {
 
   const loadIOCs = useCallback(async () => {
     setLoading(true);
-    setError("");
 
     try {
       const response = await fetch("/api/iocs", { cache: "no-store" });
@@ -48,6 +47,14 @@ export default function IOCManagement() {
     void loadIOCs();
   }, [loadIOCs]);
 
+  function resetForm() {
+    setEditingId(null);
+    setIocValue("");
+    setIocType("IP");
+    setSeverity("Medium");
+    setSource("Demo Threat Feed");
+  }
+
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setSaving(true);
@@ -55,16 +62,19 @@ export default function IOCManagement() {
     setSuccess("");
 
     try {
-      const response = await fetch("/api/iocs", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          iocValue,
-          iocType,
-          severity,
-          source,
-        }),
-      });
+      const response = await fetch(
+        editingId ? `/api/iocs/${editingId}` : "/api/iocs",
+        {
+          method: editingId ? "PUT" : "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            iocValue,
+            iocType,
+            severity,
+            source,
+          }),
+        }
+      );
 
       const data = await response.json();
 
@@ -72,14 +82,54 @@ export default function IOCManagement() {
         throw new Error(data.error || "Could not save IOC.");
       }
 
-      setSuccess("IOC saved successfully.");
-      setIocValue("");
+      setSuccess(editingId ? "IOC updated successfully." : "IOC saved successfully.");
+
+      resetForm();
       setShowForm(false);
       await loadIOCs();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not save IOC.");
     } finally {
       setSaving(false);
+    }
+  }
+
+  function handleEdit(ioc: IOC) {
+    setEditingId(ioc.ioc_id);
+    setIocValue(ioc.ioc_value);
+    setIocType(ioc.ioc_type);
+    setSeverity(ioc.severity);
+    setSource(ioc.source);
+    setError("");
+    setSuccess("");
+    setShowForm(true);
+  }
+
+  async function handleDelete(ioc: IOC) {
+    const confirmed = window.confirm(
+      `Delete IOC #${ioc.ioc_id} (${ioc.ioc_value})?`
+    );
+
+    if (!confirmed) return;
+
+    setError("");
+    setSuccess("");
+
+    try {
+      const response = await fetch(`/api/iocs/${ioc.ioc_id}`, {
+        method: "DELETE",
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Could not delete IOC.");
+      }
+
+      setSuccess("IOC deleted successfully.");
+      await loadIOCs();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not delete IOC.");
     }
   }
 
@@ -115,7 +165,14 @@ export default function IOCManagement() {
             onClick={() => {
               setError("");
               setSuccess("");
-              setShowForm((current) => !current);
+
+              if (showForm) {
+                setShowForm(false);
+                resetForm();
+              } else {
+                resetForm();
+                setShowForm(true);
+              }
             }}
             className="rounded-lg bg-blue-600 px-5 py-3 font-semibold hover:bg-blue-500"
           >
@@ -140,6 +197,10 @@ export default function IOCManagement() {
             onSubmit={handleSubmit}
             className="mt-6 grid gap-4 rounded-xl border border-slate-800 bg-slate-900 p-6 md:grid-cols-2"
           >
+            <h3 className="text-lg font-semibold md:col-span-2">
+              {editingId ? "Edit IOC" : "Add New IOC"}
+            </h3>
+
             <label className="text-sm text-slate-300">
               IOC Value
               <input
@@ -195,13 +256,28 @@ export default function IOCManagement() {
               />
             </label>
 
-            <div className="md:col-span-2">
+            <div className="flex gap-3 md:col-span-2">
               <button
                 type="submit"
                 disabled={saving}
                 className="rounded-lg bg-green-600 px-5 py-3 font-semibold hover:bg-green-500 disabled:opacity-50"
               >
-                {saving ? "Saving..." : "Save IOC"}
+                {saving
+                  ? "Saving..."
+                  : editingId
+                  ? "Update IOC"
+                  : "Save IOC"}
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  resetForm();
+                  setShowForm(false);
+                }}
+                className="rounded-lg bg-slate-700 px-5 py-3 font-semibold hover:bg-slate-600"
+              >
+                Cancel
               </button>
             </div>
           </form>
@@ -216,29 +292,35 @@ export default function IOCManagement() {
             <table className="w-full text-left">
               <thead className="bg-slate-950">
                 <tr>
-                  {["IOC ID", "Value", "Type", "Severity", "Source", "Status"].map(
-                    (heading) => (
-                      <th
-                        key={heading}
-                        className="px-6 py-4 text-sm text-slate-400"
-                      >
-                        {heading}
-                      </th>
-                    )
-                  )}
+                  {[
+                    "IOC ID",
+                    "Value",
+                    "Type",
+                    "Severity",
+                    "Source",
+                    "Status",
+                    "Actions",
+                  ].map((heading) => (
+                    <th
+                      key={heading}
+                      className="px-6 py-4 text-sm text-slate-400"
+                    >
+                      {heading}
+                    </th>
+                  ))}
                 </tr>
               </thead>
 
               <tbody>
                 {loading ? (
                   <tr>
-                    <td colSpan={6} className="px-6 py-6 text-slate-400">
+                    <td colSpan={7} className="px-6 py-6 text-slate-400">
                       Loading IOC records...
                     </td>
                   </tr>
                 ) : iocs.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="px-6 py-6 text-slate-400">
+                    <td colSpan={7} className="px-6 py-6 text-slate-400">
                       No IOC records found.
                     </td>
                   </tr>
@@ -252,10 +334,31 @@ export default function IOCManagement() {
                       <td className="px-6 py-5">{ioc.ioc_type}</td>
                       <td className="px-6 py-5">{ioc.severity}</td>
                       <td className="px-6 py-5">{ioc.source}</td>
+
                       <td className="px-6 py-5">
                         <span className="rounded-full bg-green-500/20 px-3 py-1 text-sm text-green-400">
                           Active
                         </span>
+                      </td>
+
+                      <td className="px-6 py-5">
+                        <div className="flex gap-2">
+                          <button
+                            type="button"
+                            onClick={() => handleEdit(ioc)}
+                            className="rounded bg-blue-600 px-3 py-1 text-sm hover:bg-blue-500"
+                          >
+                            Edit
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={() => void handleDelete(ioc)}
+                            className="rounded bg-red-600 px-3 py-1 text-sm hover:bg-red-500"
+                          >
+                            Delete
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))
