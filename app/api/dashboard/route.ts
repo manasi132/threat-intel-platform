@@ -13,13 +13,13 @@ export async function GET() {
   try {
     const db = getMySqlPool();
     const isAdmin = session.role === "Admin";
-    const incidentScope = isAdmin ? " AND reported_by = ?" : "";
+    const incidentScope = isAdmin ? " AND inc.reported_by = ?" : "";
     const viewIncidentScope = isAdmin ? " AND i.reported_by = ?" : "";
     const assetScope = isAdmin ? " AND a.owner_user_id = ?" : "";
     const userParams = isAdmin ? [session.userId] : [];
 
     const [open] = await db.execute<RowDataPacket[]>(
-      `SELECT COUNT(*) AS total FROM incidents WHERE status IN ('Open','Investigating')${incidentScope}`,
+      `SELECT COUNT(*) AS total FROM incidents inc WHERE inc.status IN ('Open','Investigating')${incidentScope}`,
       userParams
     );
 
