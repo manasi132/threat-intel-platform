@@ -10,9 +10,9 @@ export async function GET() {
   if (session.role !== "Admin") return NextResponse.json({ error: "Admin access only." }, { status: 403 });
   try {
     const [users] = await getMySqlPool().execute<RowDataPacket[]>(
-      "SELECT u.user_id,u.full_name,u.email,u.status,u.created_at,r.role_name FROM users u JOIN roles r ON r.role_id=u.role_id WHERE r.role_name='Analyst' ORDER BY u.created_at DESC"
+      "SELECT u.user_id,u.full_name,u.email,u.status,u.created_at,r.role_name FROM users u JOIN roles r ON r.role_id=u.role_id WHERE u.user_id=? LIMIT 1", [session.userId]
     );
-    return NextResponse.json({ analysts: users });
+    return NextResponse.json({ account: users[0] ?? null });
   } catch {
     return NextResponse.json({ error: "Unable to load analyst accounts." }, { status: 500 });
   }
