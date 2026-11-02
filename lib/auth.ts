@@ -11,7 +11,7 @@ const secret = new TextEncoder().encode(secretText);
 export type SessionUser = { userId: number; email: string; fullName: string; role: "Admin" | "Analyst" };
 
 export async function createSession(user: SessionUser) {
-  const token = await new SignJWT({ email: user.email, fullName: user.fullName, role: user.role })
+  const token = await new SignJWT({ userId: user.userId, email: user.email, fullName: user.fullName, role: user.role })
     .setProtectedHeader({ alg: "HS256" }).setSubject(String(user.userId))
     .setIssuedAt().setExpirationTime("8h").sign(secret);
   const jar = await cookies();
