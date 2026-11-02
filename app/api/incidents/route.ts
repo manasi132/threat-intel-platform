@@ -9,7 +9,7 @@ const SEVERITIES = new Set(["Low", "Medium", "High", "Critical"]);
 export async function GET() {
   try {
     const db = getMySqlPool();
-    const [incidents] = await db.query<RowDataPacket[]>("SELECT incident_id,title,severity,status,created_at,reported_by,ioc_count,affected_asset_count,alert_count FROM analyst_dashboard_v ORDER BY created_at DESC LIMIT 100");
+    const [incidents] = await db.query<RowDataPacket[]>("SELECT v.incident_id,v.title,v.severity,v.status,i.created_at,v.reported_by,v.ioc_count,v.affected_asset_count,v.alert_count FROM analyst_dashboard_v v JOIN incidents i ON i.incident_id = v.incident_id ORDER BY i.created_at DESC LIMIT 100");
     const [alerts] = await db.query<RowDataPacket[]>("SELECT a.alert_id,a.incident_id,a.alert_type,a.message,a.severity,a.is_read,a.created_at,i.title AS incident_title FROM alerts a JOIN incidents i ON i.incident_id=a.incident_id ORDER BY a.created_at DESC LIMIT 10");
     return NextResponse.json({ incidents, alerts });
   } catch (e) {
