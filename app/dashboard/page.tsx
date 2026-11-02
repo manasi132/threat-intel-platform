@@ -1,114 +1,58 @@
+"use client";
+
+import Link from "next/link";
+import { useEffect, useState } from "react";
+
+type Incident = { incident_id: number; title: string; severity: string; status: string; };
+type Alert = { alert_id: number; incident_id: number; alert_type: string; message: string; severity: string; is_read: number; incident_title: string; };
+type DashboardData = {
+  summary: { openIncidents: number; highRiskIOCs: number; affectedAssets: number; unreadAlerts: number };
+  recentIncidents: Incident[];
+  latestAlerts: Alert[];
+};
+
+const metrics = [
+  ["openIncidents", "Open Incidents", "/incidents"],
+  ["highRiskIOCs", "High-Risk IOCs", "/iocs"],
+  ["affectedAssets", "Affected Assets", "/incidents"],
+  ["unreadAlerts", "Unread Alerts", "/incidents"],
+] as const;
+
 export default function Dashboard() {
+  const [data, setData] = useState<DashboardData | null>(null);
+  const [error, setError] = useState("");
+  useEffect(() => {
+    let active = true;
+    fetch("/api/dashboard", { cache: "no-store" })
+      .then(async (r) => { const body = await r.json(); if (!r.ok) throw new Error(body.error || "Could not load dashboard."); return body as DashboardData; })
+      .then((body) => { if (active) setData(body); })
+      .catch((e: unknown) => { if (active) setError(e instanceof Error ? e.message : "Dashboard request failed."); });
+    return () => { active = false; };
+  }, []);
+
   return (
-    <main className="min-h-screen bg-slate-950 text-white">
-      <nav className="border-b border-slate-800 bg-slate-900 px-8 py-5">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-xl font-bold">
-              Threat Intel Platform
-            </h1>
-            <p className="text-sm text-slate-400">
-              Analyst Dashboard
-            </p>
-          </div>
-
-          <div className="text-sm text-slate-300">
-            Demo Analyst
-          </div>
-        </div>
-      </nav>
-
-      <section className="p-8">
-        <h2 className="text-3xl font-bold">
-          Security Overview
-        </h2>
-
-        <p className="mt-2 text-slate-400">
-          Monitor incidents, IOCs, assets and security alerts.
-        </p>
-
-        <div className="mt-8 grid gap-5 md:grid-cols-4">
-          <div className="rounded-xl border border-slate-800 bg-slate-900 p-6">
-            <p className="text-sm text-slate-400">Open Incidents</p>
-            <p className="mt-2 text-3xl font-bold">2</p>
-          </div>
-
-          <div className="rounded-xl border border-slate-800 bg-slate-900 p-6">
-            <p className="text-sm text-slate-400">High-Risk IOCs</p>
-            <p className="mt-2 text-3xl font-bold">1</p>
-          </div>
-
-          <div className="rounded-xl border border-slate-800 bg-slate-900 p-6">
-            <p className="text-sm text-slate-400">Affected Assets</p>
-            <p className="mt-2 text-3xl font-bold">1</p>
-          </div>
-
-          <div className="rounded-xl border border-slate-800 bg-slate-900 p-6">
-            <p className="text-sm text-slate-400">Unread Alerts</p>
-            <p className="mt-2 text-3xl font-bold">1</p>
-          </div>
-        </div>
-
-        <div className="mt-8 grid gap-6 md:grid-cols-2">
-          <div className="rounded-xl border border-slate-800 bg-slate-900 p-6">
-            <h3 className="text-lg font-semibold">
-              Recent Incidents
-            </h3>
-
-            <div className="mt-5 space-y-4">
-              <div className="flex justify-between border-b border-slate-800 pb-4">
-                <div>
-                  <p className="font-medium">
-                    IOC Trigger Test
-                  </p>
-                  <p className="text-sm text-slate-400">
-                    Incident #4
-                  </p>
-                </div>
-
-                <span className="rounded-full bg-red-500/20 px-3 py-1 text-sm text-red-400">
-                  High
-                </span>
-              </div>
-
-              <div className="flex justify-between">
-                <div>
-                  <p className="font-medium">
-                    Suspicious Authentication Activity
-                  </p>
-                  <p className="text-sm text-slate-400">
-                    Incident #2
-                  </p>
-                </div>
-
-                <span className="rounded-full bg-yellow-500/20 px-3 py-1 text-sm text-yellow-400">
-                  Medium
-                </span>
-              </div>
-            </div>
-          </div>
-
-          <div className="rounded-xl border border-slate-800 bg-slate-900 p-6">
-            <h3 className="text-lg font-semibold">
-              Latest Alert
-            </h3>
-
-            <div className="mt-5 rounded-lg border border-red-900/50 bg-red-950/30 p-5">
-              <p className="font-semibold text-red-400">
-                IOC Match
-              </p>
-
-              <p className="mt-2 text-sm text-slate-300">
-                New IOC matched an active incident.
-              </p>
-
-              <p className="mt-3 text-xs text-slate-500">
-                Incident #4 · High Severity
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
+    <main className="mx-auto min-h-screen max-w-7xl px-5 py-8 md:px-8">
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div><h1 className="text-2xl font-bold">Security Overview</h1><p className="mt-2 text-sm text-slate-400">Monitor incidents, IOCs, assets and security alerts.</p></div>
+        <Link href="/incidents" className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold hover:bg-blue-500">View incidents</Link>
+      </div>
+      {error && <p role="alert" className="mt-5 rounded-lg border border-red-800 bg-red-950/40 p-3 text-sm text-red-300">{error}</p>}
+      <div className="mt-7 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        {metrics.map(([key, label, href]) => <Link key={key} href={href} className="rounded-xl border border-slate-800 bg-slate-900 p-5 transition hover:border-blue-500 hover:bg-slate-900/80"><p className="text-sm text-slate-400">{label}</p><p className="mt-2 text-3xl font-bold">{data ? data.summary[key] : "—"}</p><span className="mt-3 block text-xs text-blue-400">Open section →</span></Link>)}
+      </div>
+      <div className="mt-6 grid gap-5 lg:grid-cols-2">
+        <section className="rounded-xl border border-slate-800 bg-slate-900 p-5">
+          <div className="mb-4 flex items-center justify-between"><h2 className="font-semibold">Recent Incidents</h2><Link href="/incidents" className="text-sm text-blue-400 hover:text-blue-300">See all</Link></div>
+          {!data && !error && <p className="text-sm text-slate-400">Loading incidents…</p>}
+          {data?.recentIncidents.length === 0 && <p className="text-sm text-slate-400">No incidents found.</p>}
+          <div className="divide-y divide-slate-800">{data?.recentIncidents.map((incident) => <Link key={incident.incident_id} href={`/incidents?id=${incident.incident_id}`} className="flex items-center justify-between gap-3 py-4 hover:bg-slate-800/40"><div><p className="font-medium">{incident.title}</p><p className="mt-1 text-xs text-slate-400">Incident #{incident.incident_id} · {incident.status}</p></div><span className="rounded-full bg-slate-800 px-3 py-1 text-xs">{incident.severity}</span></Link>)}</div>
+        </section>
+        <section className="rounded-xl border border-slate-800 bg-slate-900 p-5"><div className="mb-4 flex items-center justify-between"><h2 className="font-semibold">Latest Alerts</h2><Link href="/incidents" className="text-sm text-blue-400 hover:text-blue-300">Review alerts</Link></div>
+          {!data && !error && <p className="text-sm text-slate-400">Loading alerts…</p>}
+          {data?.latestAlerts.length === 0 && <p className="text-sm text-slate-400">No alerts found.</p>}
+          <div className="space-y-3">{data?.latestAlerts.map((alert) => <Link key={alert.alert_id} href={`/incidents?id=${alert.incident_id}`} className="block rounded-lg border border-slate-800 bg-slate-950 p-4 hover:border-blue-500"><div className="flex justify-between gap-3"><p className="font-semibold">{alert.alert_type}</p><span className="text-xs text-slate-400">{alert.is_read ? "Read" : "Unread"}</span></div><p className="mt-2 text-sm text-slate-300">{alert.message}</p><p className="mt-2 text-xs text-slate-500">Incident #{alert.incident_id} · {alert.severity}</p></Link>)}</div>
+        </section>
+      </div>
     </main>
   );
 }
