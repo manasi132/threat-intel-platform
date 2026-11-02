@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import type { ResultSetHeader, RowDataPacket } from "mysql2/promise";
 import { getMySqlPool } from "@/lib/mysql";
+import { getSession } from "@/lib/auth";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -8,14 +9,24 @@ const IOC_TYPES = new Set(["IP", "Domain", "URL", "Hash"]);
 const SEVERITIES = new Set(["Low", "Medium", "High", "Critical"]);
 
 export async function GET(request: Request) {
+  const session = await getSession();
+  if (!session) return NextResponse.json({ error: "Sign in required." }, { status: 401 });
+
   try {
     const search = (new URL(request.url).searchParams.get("q") || "").trim();
     const like = `%${search}%`;
+    const adminScope = session.role === "Admin"
+      ? " AND EXISTS (SELECT 1 FROM ioc_incident ii JOIN incidents inc ON inc.incident_id=ii.incident_id WHERE ii.ioc_id=i.ioc_id AND inc.reported_by=?)"
+      : "";
+    const params = session.role === "Admin"
+      ? [search, like, like, like, session.userId]
+      : [search, like, like, like];
     const [rows] = await getMySqlPool().execute<RowDataPacket[]>(
       `SELECT i.ioc_id,i.ioc_value,i.ioc_type,i.severity,i.source,i.first_seen,i.last_seen,i.created_at,i.feed_id,tf.feed_name
        FROM iocs i LEFT JOIN threat_feeds tf ON tf.feed_id=i.feed_id
-       WHERE (?='' OR i.ioc_value LIKE ? OR i.source LIKE ? OR i.ioc_type LIKE ?)
-       ORDER BY i.created_at DESC LIMIT 200`, [search, like, like, like]
+       WHERE (?='' OR i.ioc_value LIKE ? OR i.source LIKE ? OR i.ioc_type LIKE ?)${adminScope}
+       ORDER BY i.created_at DESC LIMIT 200`,
+      params
     );
     return NextResponse.json({ iocs: rows });
   } catch (e) {
@@ -24,6 +35,9 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
+  const session = await getSession();
+  if (!session) return NextResponse.json({ error: "Sign in required." }, { status: 401 });
+
   try {
     const body = await request.json() as { iocValue?: string; iocType?: string; severity?: string; source?: string; feedId?: number | string | null };
     const value = body.iocValue?.trim(); const type = body.iocType; const severity = body.severity; const source = body.source?.trim();
