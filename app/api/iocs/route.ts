@@ -46,7 +46,28 @@ export async function POST(request: Request) {
     if (!type || !IOC_TYPES.has(type)) return NextResponse.json({ error: "IOC type must be IP, Domain, URL, or Hash." }, { status: 400 });
     if (!severity || !SEVERITIES.has(severity)) return NextResponse.json({ error: "Choose a valid severity." }, { status: 400 });
     if (feedId !== null && (!Number.isInteger(feedId) || feedId < 1)) return NextResponse.json({ error: "Feed ID must be a positive integer." }, { status: 400 });
-    const [result] = await getMySqlPool().execute<ResultSetHeader>("INSERT INTO iocs (feed_id,ioc_value,ioc_type,severity,source) VALUES (?,?,?,?,?)", [feedId, value, type, severity, source]);
+
+    const db = getMySqlPool();
+    const [result] = await db.execute<ResultSetHeader>(
+      "INSERT INTO iocs (feed_id,ioc_value,ioc_type,severity,source) VALUES (?,?,?,?,?)",
+      [feedId, value, type, severity, source]
+    );
+
+    // Link newly submitted Admin IOCs to an Admin-owned incident so that the
+    // Admin's existing ownership-scoped IOC list can display and manage them.
+    if (session.role === "Admin") {
+      const [ownedIncidents] = await db.execute<RowDataPacket[]>(
+        "SELECT incident_id FROM incidents WHERE reported_by=? ORDER BY created_at DESC LIMIT 1",
+        [session.userId]
+      );
+      if (ownedIncidents.length) {
+        await db.execute(
+          "INSERT INTO ioc_incident (ioc_id,incident_id,match_reason,confidence) VALUES (?,?,?,?)",
+          [result.insertId, ownedIncidents[0].incident_id, "Added by the signed-in Admin", 95]
+        );
+      }
+    }
+
     return NextResponse.json({ message: "IOC saved to MySQL.", iocId: result.insertId }, { status: 201 });
   } catch (e) {
     if ((e as { code?: string })?.code === "ER_DUP_ENTRY") return NextResponse.json({ error: "This IOC value already exists." }, { status: 409 });
