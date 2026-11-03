@@ -14,8 +14,8 @@ type DashboardData = {
 const metrics = [
   ["openIncidents", "Open Incidents", "/incidents"],
   ["highRiskIOCs", "High-Risk IOCs", "/iocs"],
-  ["affectedAssets", "Affected Assets", "/incidents"],
-  ["unreadAlerts", "Unread Alerts", "/incidents"],
+  ["affectedAssets", "Affected Assets", "/assets"],
+  ["unreadAlerts", "Unread Alerts", "/alerts"],
 ] as const;
 
 export default function Dashboard() {
@@ -34,7 +34,7 @@ export default function Dashboard() {
     <main className="mx-auto min-h-screen max-w-7xl px-5 py-8 md:px-8">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div><h1 className="text-2xl font-bold">Security Overview</h1><p className="mt-2 text-sm text-slate-400">Monitor incidents, IOCs, assets and security alerts.</p></div>
-        <Link href="/incidents" className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold hover:bg-blue-500">View incidents</Link>
+        <Link href="/alerts" className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold hover:bg-blue-500">View incidents</Link>
       </div>
       {error && <p role="alert" className="mt-5 rounded-lg border border-red-800 bg-red-950/40 p-3 text-sm text-red-300">{error}</p>}
       <div className="mt-7 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
