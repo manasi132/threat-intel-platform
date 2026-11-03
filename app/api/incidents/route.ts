@@ -12,14 +12,14 @@ export async function GET() {
   if (!session) return NextResponse.json({ error: "Sign in required." }, { status: 401 });
   try {
     const db = getMySqlPool();
-    const own = session.role === "Admin";
-    const filter = own ? " WHERE i.reported_by=?" : "";
-    const params = own ? [session.userId] : [];
+    const isAdmin = session.role === "Admin";
+    const filter = isAdmin ? " WHERE i.reported_by=?" : "";
+    const params = isAdmin ? [session.userId] : [];
     const [incidents] = await db.execute<RowDataPacket[]>(
       `SELECT v.incident_id,v.title,v.severity,v.status,i.created_at,v.reported_by,v.ioc_count,v.affected_asset_count,v.alert_count FROM analyst_dashboard_v v JOIN incidents i ON i.incident_id=v.incident_id${filter} ORDER BY i.created_at DESC LIMIT 100`,
       params
     );
-    const [alerts] = own
+    const [alerts] = isAdmin
       ? await db.execute<RowDataPacket[]>(
           "SELECT a.alert_id,a.incident_id,a.alert_type,a.message,a.severity,a.is_read,a.created_at,i.title AS incident_title FROM alerts a JOIN incidents i ON i.incident_id=a.incident_id WHERE i.reported_by=? ORDER BY a.created_at DESC LIMIT 10",
           [session.userId]
@@ -29,7 +29,10 @@ export async function GET() {
         );
     return NextResponse.json({ incidents, alerts });
   } catch (e) {
-    return NextResponse.json({ error: "Could not load incidents from MySQL. Confirm analyst_dashboard_v exists.", details: process.env.NODE_ENV === "development" && e instanceof Error ? e.message : undefined }, { status: 503 });
+    return NextResponse.json({
+      error: "Could not load incidents from MySQL. Confirm analyst_dashboard_v exists.",
+      details: process.env.NODE_ENV === "development" && e instanceof Error ? e.message : undefined,
+    }, { status: 503 });
   }
 }
 
@@ -49,6 +52,9 @@ export async function POST(request: Request) {
     );
     return NextResponse.json({ message: "Incident created in MySQL.", incidentId: result.insertId }, { status: 201 });
   } catch (e) {
-    return NextResponse.json({ error: "Could not create incident in MySQL.", details: process.env.NODE_ENV === "development" && e instanceof Error ? e.message : undefined }, { status: 503 });
+    return NextResponse.json({
+      error: "Could not create incident in MySQL.",
+      details: process.env.NODE_ENV === "development" && e instanceof Error ? e.message : undefined,
+    }, { status: 503 });
   }
 }
