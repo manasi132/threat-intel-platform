@@ -50,16 +50,11 @@ export async function POST(request: Request) {
     const db = getMySqlPool();
     if (session.role === "Admin") {
       const [allowed] = await db.execute<RowDataPacket[]>(
-        "SELECT inc.incident_id FROM incidents inc WHERE inc.incident_id=? AND inc.reported_by=? AND EXISTS (SELECT 1 FROM ioc_incident existing_link JOIN incidents own_inc ON own_inc.incident_id=existing_link.incident_id WHERE existing_link.ioc_id=? AND own_inc.reported_by=?) LIMIT 1",
-        [incidentId, session.userId, iocId, session.userId]
+        "SELECT inc.incident_id FROM incidents inc WHERE inc.incident_id=? AND inc.reported_by=? AND EXISTS (SELECT 1 FROM iocs i WHERE i.ioc_id=?) LIMIT 1",
+        [incidentId, session.userId, iocId]
       );
-      // A previously unlinked IOC is allowed only when the target incident is owned.
       if (!allowed.length) {
-        const [ownedIncident] = await db.execute<RowDataPacket[]>(
-          "SELECT incident_id FROM incidents WHERE incident_id=? AND reported_by=? LIMIT 1",
-          [incidentId, session.userId]
-        );
-        if (!ownedIncident.length) return NextResponse.json({ error: "You can only correlate IOCs with your own incidents." }, { status: 403 });
+        return NextResponse.json({ error: "You can only correlate an existing IOC with your own incident." }, { status: 403 });
       }
     }
     const [result] = await db.execute<ResultSetHeader>(
