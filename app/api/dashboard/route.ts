@@ -33,8 +33,8 @@ export async function GET() {
         );
 
     const [assets] = await db.execute<RowDataPacket[]>(
-      `SELECT COUNT(DISTINCT a.asset_id) AS total FROM assets a LEFT JOIN asset_ioc ai ON ai.asset_id=a.asset_id WHERE 1=1${assetScope}`,
-      userParams
+      `SELECT COUNT(DISTINCT a.asset_id) AS total FROM assets a WHERE ${isAdmin ? "a.owner_user_id = ?" : "1=1"}`,
+      isAdmin ? [session.userId] : []
     );
 
     const [unread] = isAdmin
