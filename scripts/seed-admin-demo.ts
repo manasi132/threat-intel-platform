@@ -60,7 +60,7 @@ async function main() {
   const iocIds: number[] = [];
   for (const sample of iocSamples) {
     await sql.execute(
-      "INSERT INTO iocs (feed_id,ioc_value,ioc_type,severity,source) VALUES (?,?,?,?,?) ON DUPLICATE KEY UPDATE feed_id=VALUES(feed_id),severity=VALUES(severity),source=VALUES(source)",
+      "INSERT INTO iocs (feed_id,ioc_value,ioc_type,severity,source) VALUES (?,?,?,?,?) ON DUPLICATE KEY UPDATE severity=VALUES(severity)",
       [feedId, sample.value, sample.type, sample.severity, feedName]
     );
     const [rows] = await sql.execute<mysql.RowDataPacket[]>(
@@ -105,7 +105,7 @@ async function main() {
 
   for (const asset of assetSamples) {
     await sql.execute(
-      "INSERT INTO assets (owner_user_id,asset_name,asset_type,ip_address,criticality) VALUES (?,?,?,?,?) ON DUPLICATE KEY UPDATE owner_user_id=VALUES(owner_user_id),asset_type=VALUES(asset_type),ip_address=VALUES(ip_address),criticality=VALUES(criticality)",
+      "INSERT INTO assets (owner_user_id,asset_name,asset_type,ip_address,criticality) VALUES (?,?,?,?,?) ON DUPLICATE KEY UPDATE asset_type=VALUES(asset_type),ip_address=VALUES(ip_address),criticality=VALUES(criticality)",
       [userId, asset.name, asset.type, asset.ip, asset.criticality]
     );
     const [assetRows] = await sql.execute<mysql.RowDataPacket[]>(
