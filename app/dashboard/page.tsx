@@ -1,8 +1,8 @@
-import AppNav from "@/components/AppNav";
 "use client";
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import AppNav from "@/components/AppNav";
 import AppNav from "@/components/AppNav";
 
 type Incident = { incident_id: number; title: string; severity: string; status: string; };
@@ -58,6 +58,7 @@ export default function Dashboard() {
         </section>
       </div>
       </section>
-    </main></>
+    </main>
+    </>
   );
 }
