@@ -1,12 +1,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import AppNav from "@/components/AppNav";
 
 type Account = { user_id: number; full_name: string; email: string; status: string; created_at: string; role_name: string };
 type Summary = { incidents: number; assets: number; correlations: number; alerts: number };
 
 export default function AdminAccountPage() {
+  const router = useRouter();
   const [account, setAccount] = useState<Account | null>(null);
   const [summary, setSummary] = useState<Summary | null>(null);
   const [error, setError] = useState("");
@@ -20,7 +22,7 @@ export default function AdminAccountPage() {
   }, []);
   async function signOut() {
     await fetch("/api/auth/logout", { method: "POST" });
-    window.location.href = "/";
+    router.push("/");
   }
   const metrics = [
     ["Incidents", summary?.incidents],
