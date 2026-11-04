@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
+import type { ReactNode } from "react";
 import { Geist, Geist_Mono } from "next/font/google";
-import AppNav from "@/components/AppNav";
 import "./globals.css";
 
 const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
@@ -11,13 +11,10 @@ export const metadata: Metadata = {
   description: "Threat intelligence, IOC correlation, and incident response workspace.",
 };
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en" className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}>
-      <body className="min-h-full bg-slate-950 text-slate-100">
-        <AppNav />
-        {children}
-      </body>
+      <body className="min-h-full bg-slate-950 text-slate-100">{children}</body>
     </html>
   );
 }
