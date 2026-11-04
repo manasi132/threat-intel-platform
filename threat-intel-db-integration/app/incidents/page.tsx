@@ -24,7 +24,11 @@ export default function Incidents() {
     } catch (e) { setError(e instanceof Error ? e.message : "Could not load incident data."); }
     finally { setLoading(false); }
   }
-  useEffect(() => { void load(); }, []);
+  useEffect(() => {
+    // Start the data request when the incidents page mounts.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    void load();
+  }, []);
   async function createIncident(e: FormEvent<HTMLFormElement>) {
     e.preventDefault(); setBusy(true); setError(""); setMessage("");
     try {
