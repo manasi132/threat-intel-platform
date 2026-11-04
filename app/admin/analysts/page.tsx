@@ -1,7 +1,7 @@
-import AppNav from "@/components/AppNav";
 "use client";
 
 import { useEffect, useState } from "react";
+import AppNav from "@/components/AppNav";
 
 type Account = { user_id: number; full_name: string; email: string; status: string; created_at: string; role_name: string };
 type Summary = { incidents: number; assets: number; correlations: number; alerts: number };
