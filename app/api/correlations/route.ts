@@ -116,7 +116,7 @@ export async function POST(request: Request) {
 
     const db = getMySqlPool();
 
-    if (session.role === "Admin") {
+    {
       const [allowed] = await db.execute<RowDataPacket[]>(
         `
           SELECT inc.incident_id
