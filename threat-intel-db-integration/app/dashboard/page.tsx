@@ -16,6 +16,7 @@ export default function Dashboard() {
     catch (e) { setError(e instanceof Error ? e.message : "Dashboard could not be loaded."); }
     finally { setLoading(false); }
   }
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => {
     // Start the data request when the dashboard mounts.
     // eslint-disable-next-line react-hooks/set-state-in-effect
