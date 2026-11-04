@@ -1,7 +1,7 @@
-import AppNav from "@/components/AppNav";
 "use client";
 
 import { useEffect, useState } from "react";
+import AppNav from "@/components/AppNav";
 
 type Alert = {
   alert_id: number;
@@ -63,6 +63,7 @@ export default function AlertsPage() {
           )}
         </div>
       </div>
-    </main></>
+    </main>
+    </>
   );
 }
