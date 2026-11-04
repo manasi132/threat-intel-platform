@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import AppNav from "@/components/AppNav";
-import AppNav from "@/components/AppNav";
 
 type Incident = { incident_id: number; title: string; severity: string; status: string; };
 type Alert = { alert_id: number; incident_id: number; alert_type: string; message: string; severity: string; is_read: number; incident_title: string; };
