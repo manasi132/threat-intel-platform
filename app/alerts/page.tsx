@@ -1,3 +1,4 @@
+import AppNav from "@/components/AppNav";
 "use client";
 
 import { useEffect, useState } from "react";
