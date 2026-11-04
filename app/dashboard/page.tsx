@@ -56,7 +56,6 @@ export default function Dashboard() {
           <div className="space-y-3">{data?.latestAlerts.map((alert) => <Link key={alert.alert_id} href={`/incidents?id=${alert.incident_id}`} className="block rounded-lg border border-slate-800 bg-slate-950 p-4 hover:border-blue-500"><div className="flex justify-between gap-3"><p className="font-semibold">{alert.alert_type}</p><span className="text-xs text-slate-400">{alert.is_read ? "Read" : "Unread"}</span></div><p className="mt-2 text-sm text-slate-300">{alert.message}</p><p className="mt-2 text-xs text-slate-500">Incident #{alert.incident_id} · {alert.severity}</p></Link>)}</div>
         </section>
       </div>
-      </section>
     </main>
     </>
   );
