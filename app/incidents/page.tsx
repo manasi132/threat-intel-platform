@@ -1,8 +1,8 @@
 "use client";
 
 import { Suspense, useEffect, useMemo, useState } from "react";
-import AppNav from "@/components/AppNav";
 import { useSearchParams } from "next/navigation";
+import AppNav from "@/components/AppNav";
 
 type Incident = {
   incident_id: number;
