@@ -15,16 +15,11 @@ export async function GET(request: Request) {
   try {
     const search = (new URL(request.url).searchParams.get("q") || "").trim();
     const like = `%${search}%`;
-    const adminScope = session.role === "Admin"
-      ? " AND EXISTS (SELECT 1 FROM ioc_incident ii JOIN incidents inc ON inc.incident_id=ii.incident_id WHERE ii.ioc_id=i.ioc_id AND inc.reported_by=?)"
-      : "";
-    const params = session.role === "Admin"
-      ? [search, like, like, like, session.userId]
-      : [search, like, like, like];
+    const params = [search, like, like, like];
     const [rows] = await getMySqlPool().execute<RowDataPacket[]>(
       `SELECT i.ioc_id,i.ioc_value,i.ioc_type,i.severity,i.source,i.first_seen,i.last_seen,i.created_at,i.feed_id,tf.feed_name
        FROM iocs i LEFT JOIN threat_feeds tf ON tf.feed_id=i.feed_id
-       WHERE (?='' OR i.ioc_value LIKE ? OR i.source LIKE ? OR i.ioc_type LIKE ?)${adminScope}
+       WHERE (?='' OR i.ioc_value LIKE ? OR i.source LIKE ? OR i.ioc_type LIKE ?)
        ORDER BY i.created_at DESC LIMIT 200`,
       params
     );
