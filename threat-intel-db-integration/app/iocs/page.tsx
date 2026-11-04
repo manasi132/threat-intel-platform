@@ -7,7 +7,11 @@ const field = "w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2.
 export default function IOCManagement() {
   const [iocs, setIocs] = useState<IOC[]>([]); const [q, setQ] = useState(""); const [open, setOpen] = useState(false); const [value, setValue] = useState(""); const [type, setType] = useState("IP"); const [severity, setSeverity] = useState("High"); const [source, setSource] = useState("Manual Entry"); const [loading, setLoading] = useState(true); const [saving, setSaving] = useState(false); const [error, setError] = useState(""); const [message, setMessage] = useState("");
   async function load() { setLoading(true); setError(""); try { const r = await fetch(`/api/iocs?q=${encodeURIComponent(q)}`, { cache: "no-store" }); const b = await r.json(); if (!r.ok) throw new Error(b.details || b.error); setIocs(b.iocs as IOC[]); } catch (e) { setError(e instanceof Error ? e.message : "Could not load IOCs."); } finally { setLoading(false); } }
-  useEffect(() => { void load(); }, [q]);
+  useEffect(() => {
+    // Search changes initiate a fresh server request.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    void load();
+  }, [q]);
   const high = useMemo(() => iocs.filter(x => ["High", "Critical"].includes(x.severity)).length, [iocs]); const ips = useMemo(() => iocs.filter(x => x.ioc_type === "IP").length, [iocs]);
   async function add(e: FormEvent<HTMLFormElement>) { e.preventDefault(); setSaving(true); setError(""); setMessage(""); try { const r = await fetch("/api/iocs", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ iocValue: value, iocType: type, severity, source }) }); const b = await r.json(); if (!r.ok) throw new Error(b.details || b.error); setMessage(b.message); setValue(""); setOpen(false); await load(); } catch (err) { setError(err instanceof Error ? err.message : "Could not save IOC."); } finally { setSaving(false); } }
   return <main className="min-h-screen bg-slate-950 text-white"><AppNav /><section className="mx-auto max-w-7xl p-5 md:p-8"><div className="flex flex-wrap items-start justify-between gap-4"><div><h1 className="text-3xl font-bold">Indicators of Compromise</h1><p className="mt-2 text-slate-400">Search and add IOC records stored in MySQL.</p></div><button onClick={() => setOpen(!open)} className="rounded-lg bg-blue-600 px-5 py-3 font-semibold hover:bg-blue-500">{open ? "Cancel" : "+ Add IOC"}</button></div><div className="mt-5 rounded-xl border border-slate-800 bg-slate-900 p-4"><DatabaseStatus /></div>
