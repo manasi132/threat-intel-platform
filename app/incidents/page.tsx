@@ -243,9 +243,7 @@ function IncidentsContent() {
   }
 
   return (
-    <>
-      <AppNav />
-      <main className="mx-auto min-h-screen max-w-7xl px-5 py-8 md:px-8">
+    <main className="mx-auto min-h-screen max-w-7xl px-5 py-8 md:px-8">
       <div>
         <h1 className="text-2xl font-bold">Incident Management</h1>
         <p className="mt-2 text-sm text-slate-400">
@@ -586,6 +584,8 @@ function IncidentsContent() {
 
 export default function Incidents() {
   return (
+    <>
+      <AppNav />
     <Suspense
       fallback={
         <main className="mx-auto min-h-screen max-w-7xl px-5 py-8 md:px-8">
@@ -595,5 +595,6 @@ export default function Incidents() {
     >
       <IncidentsContent />
     </Suspense>
+    </>
   );
 }
