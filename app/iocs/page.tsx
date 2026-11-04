@@ -55,7 +55,9 @@ export default function IOCManagement() {
         if (active) { setRole(data.user.role); setFullName(data.user.fullName || data.user.email); }
       })
       .catch((err) => { if (active) setError(err instanceof Error ? err.message : "Could not load your account."); })
-      .finally(() => { if (active) void loadIOCs(); });
+      // Loading is initiated after the auth request settles.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    .finally(() => { if (active) void loadIOCs(); });
     return () => { active = false; };
   }, [loadIOCs]);
 
