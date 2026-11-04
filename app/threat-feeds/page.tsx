@@ -8,6 +8,7 @@ const field = "w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2.
 export default function ThreatFeeds() {
   const [records, setRecords] = useState<RecordRow[]>([]); const [role, setRole] = useState<"Admin" | "Analyst" | null>(null); const [counts, setCounts] = useState<SourceCount[]>([]); const [source, setSource] = useState("Manual Feed"); const [value, setValue] = useState(""); const [type, setType] = useState("IP"); const [severity, setSeverity] = useState("Medium"); const [tags, setTags] = useState(""); const [loading, setLoading] = useState(true); const [saving, setSaving] = useState(false); const [error, setError] = useState(""); const [message, setMessage] = useState("");
   async function load() { setLoading(true); setError(""); try { const r = await fetch("/api/threat-feeds", { cache: "no-store" }); const b = await r.json(); if (!r.ok) throw new Error(b.details || b.error); setRecords(b.records as RecordRow[]); setCounts(b.sourceCounts as SourceCount[]); } catch (e) { setError(e instanceof Error ? e.message : "Could not load threat feeds."); } finally { setLoading(false); } }
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { let active = true; fetch("/api/auth/me", { cache: "no-store" }).then(async r => { const d = await r.json(); if (!r.ok) throw new Error(d.error); if (active) setRole(d.user.role); }).catch(() => { if (active) setRole("Analyst"); }).finally(() => {
     // Fetch completion triggers the initial records load.
     // eslint-disable-next-line react-hooks/set-state-in-effect
