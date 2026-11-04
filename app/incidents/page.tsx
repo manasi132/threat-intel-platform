@@ -102,6 +102,8 @@ function IncidentsContent() {
   useEffect(() => {
     let active = true;
 
+    // These loaders update state after their network requests resolve.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     Promise.all([loadIncidents(), loadIocs(), loadCorrelations()])
         .then(([loadedIncidents]) => {
         if (!active) return;
