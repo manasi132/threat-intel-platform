@@ -33,7 +33,7 @@ export default function Dashboard() {
   }, []);
 
   return (
-    <main className="min-h-screen">
+    <><AppNav /><main className="min-h-screen">
       <AppNav />
       <section className="mx-auto max-w-7xl px-5 py-8 md:px-8">
       <div className="flex flex-wrap items-start justify-between gap-3">
@@ -58,6 +58,6 @@ export default function Dashboard() {
         </section>
       </div>
       </section>
-    </main>
+    </main></>
   );
 }
