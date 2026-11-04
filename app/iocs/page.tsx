@@ -46,6 +46,8 @@ export default function IOCManagement() {
     }
   }, []);
 
+  // eslint-disable-next-line react-hooks/set-state-in-effect
+
   useEffect(() => {
     let active = true;
     fetch("/api/auth/me", { cache: "no-store" })
