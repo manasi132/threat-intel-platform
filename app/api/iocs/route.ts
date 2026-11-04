@@ -37,6 +37,7 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   const session = await getSession();
   if (!session) return NextResponse.json({ error: "Sign in required." }, { status: 401 });
+  if (session.role !== "Admin") return NextResponse.json({ error: "Admin access only. Analysts can view and correlate IOCs." }, { status: 403 });
 
   try {
     const body = await request.json() as { iocValue?: string; iocType?: string; severity?: string; source?: string; feedId?: number | string | null };
