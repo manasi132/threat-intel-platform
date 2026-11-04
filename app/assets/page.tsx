@@ -1,7 +1,7 @@
-import AppNav from "@/components/AppNav";
 "use client";
 
 import { useEffect, useState } from "react";
+import AppNav from "@/components/AppNav";
 
 type AssetRow = {
   asset_id: number;
@@ -165,6 +165,7 @@ export default function AssetsPage() {
           <p className="mt-4 text-sm text-slate-400">No assets found.</p>
         )}
       </div>
-    </main></>
+    </main>
+    </>
   );
 }
