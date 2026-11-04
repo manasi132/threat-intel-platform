@@ -1,7 +1,7 @@
-import AppNav from "@/components/AppNav";
 "use client";
 
 import { Suspense, useEffect, useMemo, useState } from "react";
+import AppNav from "@/components/AppNav";
 import { useSearchParams } from "next/navigation";
 
 type Incident = {
