@@ -29,7 +29,7 @@ export default function AdminAccountPage() {
     ["Alerts", summary?.alerts],
   ] as const;
 
-  return <main className="min-h-screen bg-slate-950 p-6 text-white sm:p-10">
+  return <><AppNav /><main className="min-h-screen bg-slate-950 p-6 text-white sm:p-10">
     <header className="mb-8 flex items-center justify-between gap-4">
       <div><h1 className="text-2xl font-bold">Threat Intel Platform</h1><p className="text-sm text-slate-400">Admin · My Account</p></div>
       <button onClick={signOut} className="rounded-lg border border-slate-700 px-4 py-2 text-sm hover:bg-slate-800">Sign out</button>
@@ -54,5 +54,5 @@ export default function AdminAccountPage() {
       </>}
       {!error && !account && <p className="mt-5 text-slate-400">Loading your account overview…</p>}
     </section>
-  </main>;
+  </main></>;
 }
