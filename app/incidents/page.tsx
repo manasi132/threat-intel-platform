@@ -243,7 +243,7 @@ function IncidentsContent() {
   }
 
   return (
-    <main className="mx-auto min-h-screen max-w-7xl px-5 py-8 md:px-8">
+    <><AppNav /><main className="mx-auto min-h-screen max-w-7xl px-5 py-8 md:px-8">
       <div>
         <h1 className="text-2xl font-bold">Incident Management</h1>
         <p className="mt-2 text-sm text-slate-400">
@@ -578,7 +578,7 @@ function IncidentsContent() {
           </div>
         )}
       </section>
-    </main>
+    </main></>
   );
 }
 
