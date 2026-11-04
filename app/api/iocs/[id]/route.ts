@@ -26,6 +26,7 @@ async function authorizeIOC(iocId: number, userId: number, role: string) {
 export async function PUT(request: Request, context: RouteContext) {
   const session = await getSession();
   if (!session) return NextResponse.json({ error: "Sign in required." }, { status: 401 });
+  if (session.role !== "Admin") return NextResponse.json({ error: "Admin access only." }, { status: 403 });
   const { id } = await context.params;
   const iocId = parseId(id);
   if (!iocId) return NextResponse.json({ error: "Invalid IOC ID." }, { status: 400 });
