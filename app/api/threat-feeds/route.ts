@@ -34,6 +34,7 @@ export async function GET() {
 export async function POST(request: Request) {
   const session = await getSession();
   if (!session) return NextResponse.json({ error: "Sign in required." }, { status: 401 });
+  if (session.role !== "Admin") return NextResponse.json({ error: "Admin access only. Analysts have read-only access to threat feeds." }, { status: 403 });
   try {
     const body = await request.json() as { source?: string; value?: string; type?: string; severity?: string; tags?: string[] | string };
     const source = body.source?.trim(); const value = body.value?.trim(); const type = body.type?.trim(); const severity = body.severity?.trim() || "Medium";
