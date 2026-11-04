@@ -12,6 +12,9 @@ type IOC = {
 
 export default function IOCManagement() {
   const [iocs, setIocs] = useState<IOC[]>([]);
+  const [role, setRole] = useState<"Admin" | "Analyst" | null>(null);
+  const [fullName, setFullName] = useState("");
+  const isAdmin = role === "Admin";
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -43,8 +46,21 @@ export default function IOCManagement() {
     }
   }, []);
 
+  // eslint-disable-next-line react-hooks/set-state-in-effect
+
   useEffect(() => {
-    void loadIOCs();
+    let active = true;
+    fetch("/api/auth/me", { cache: "no-store" })
+      .then(async (response) => {
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error || "Could not load your account.");
+        if (active) { setRole(data.user.role); setFullName(data.user.fullName || data.user.email); }
+      })
+      .catch((err) => { if (active) setError(err instanceof Error ? err.message : "Could not load your account."); })
+      // Loading is initiated after the auth request settles.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    .finally(() => { if (active) void loadIOCs(); });
+    return () => { active = false; };
   }, [loadIOCs]);
 
   function resetForm() {
@@ -147,7 +163,7 @@ export default function IOCManagement() {
             <h1 className="text-xl font-bold">Threat Intel Platform</h1>
             <p className="text-sm text-slate-400">IOC Management</p>
           </div>
-          <div className="text-sm text-slate-300">Demo Analyst</div>
+          <div className="text-right text-sm text-slate-300"><div>{fullName || "Signed-in user"}</div><div className="text-xs text-slate-400">{role || "Loading role…"}</div></div>
         </div>
       </nav>
 
@@ -160,7 +176,7 @@ export default function IOCManagement() {
             </p>
           </div>
 
-          <button
+          {isAdmin && <button
             type="button"
             onClick={() => {
               setError("");
@@ -177,7 +193,7 @@ export default function IOCManagement() {
             className="rounded-lg bg-blue-600 px-5 py-3 font-semibold hover:bg-blue-500"
           >
             {showForm ? "Close Form" : "+ Add IOC"}
-          </button>
+          </button>}
         </div>
 
         {error && (
@@ -299,7 +315,7 @@ export default function IOCManagement() {
                     "Severity",
                     "Source",
                     "Status",
-                    "Actions",
+                    ...(isAdmin ? ["Actions"] : []),
                   ].map((heading) => (
                     <th
                       key={heading}
@@ -314,7 +330,7 @@ export default function IOCManagement() {
               <tbody>
                 {loading ? (
                   <tr>
-                    <td colSpan={7} className="px-6 py-6 text-slate-400">
+                    <td colSpan={isAdmin ? 7 : 6} className="px-6 py-6 text-slate-400">
                       Loading IOC records...
                     </td>
                   </tr>
@@ -341,7 +357,7 @@ export default function IOCManagement() {
                         </span>
                       </td>
 
-                      <td className="px-6 py-5">
+                      {isAdmin && <td className="px-6 py-5">
                         <div className="flex gap-2">
                           <button
                             type="button"
@@ -359,7 +375,7 @@ export default function IOCManagement() {
                             Delete
                           </button>
                         </div>
-                      </td>
+                      </td>}
                     </tr>
                   ))
                 )}

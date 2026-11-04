@@ -15,7 +15,6 @@ export async function GET() {
     const isAdmin = session.role === "Admin";
     const incidentScope = isAdmin ? " AND inc.reported_by = ?" : "";
     const viewIncidentScope = isAdmin ? " AND i.reported_by = ?" : "";
-    const assetScope = isAdmin ? " AND a.owner_user_id = ?" : "";
     const userParams = isAdmin ? [session.userId] : [];
 
     const [open] = await db.execute<RowDataPacket[]>(

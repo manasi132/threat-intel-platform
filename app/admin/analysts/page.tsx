@@ -1,11 +1,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import AppNav from "@/components/AppNav";
 
 type Account = { user_id: number; full_name: string; email: string; status: string; created_at: string; role_name: string };
 type Summary = { incidents: number; assets: number; correlations: number; alerts: number };
 
 export default function AdminAccountPage() {
+  const router = useRouter();
   const [account, setAccount] = useState<Account | null>(null);
   const [summary, setSummary] = useState<Summary | null>(null);
   const [error, setError] = useState("");
@@ -19,7 +22,7 @@ export default function AdminAccountPage() {
   }, []);
   async function signOut() {
     await fetch("/api/auth/logout", { method: "POST" });
-    window.location.href = "/";
+    router.push("/");
   }
   const metrics = [
     ["Incidents", summary?.incidents],
@@ -28,7 +31,7 @@ export default function AdminAccountPage() {
     ["Alerts", summary?.alerts],
   ] as const;
 
-  return <main className="min-h-screen bg-slate-950 p-6 text-white sm:p-10">
+  return <><AppNav /><main className="min-h-screen bg-slate-950 p-6 text-white sm:p-10">
     <header className="mb-8 flex items-center justify-between gap-4">
       <div><h1 className="text-2xl font-bold">Threat Intel Platform</h1><p className="text-sm text-slate-400">Admin · My Account</p></div>
       <button onClick={signOut} className="rounded-lg border border-slate-700 px-4 py-2 text-sm hover:bg-slate-800">Sign out</button>
@@ -53,5 +56,5 @@ export default function AdminAccountPage() {
       </>}
       {!error && !account && <p className="mt-5 text-slate-400">Loading your account overview…</p>}
     </section>
-  </main>;
+  </main></>;
 }

@@ -14,25 +14,14 @@ function parseId(id: string) {
   return Number.isSafeInteger(value) && value > 0 ? value : null;
 }
 
-async function authorizeIOC(iocId: number, userId: number, role: string) {
-  if (role !== "Admin") return true;
-  const [rows] = await getMySqlPool().execute<RowDataPacket[]>(
-    "SELECT i.ioc_id FROM iocs i WHERE i.ioc_id=? AND EXISTS (SELECT 1 FROM ioc_incident ii JOIN incidents inc ON inc.incident_id=ii.incident_id WHERE ii.ioc_id=i.ioc_id AND inc.reported_by=?) LIMIT 1",
-    [iocId, userId]
-  );
-  return rows.length > 0;
-}
-
 export async function PUT(request: Request, context: RouteContext) {
   const session = await getSession();
   if (!session) return NextResponse.json({ error: "Sign in required." }, { status: 401 });
+  if (session.role !== "Admin") return NextResponse.json({ error: "Admin access only." }, { status: 403 });
   const { id } = await context.params;
   const iocId = parseId(id);
   if (!iocId) return NextResponse.json({ error: "Invalid IOC ID." }, { status: 400 });
   try {
-    if (!(await authorizeIOC(iocId, session.userId, session.role))) {
-      return NextResponse.json({ error: "You can only edit IOCs linked to your own incidents." }, { status: 403 });
-    }
     const body = await request.json() as { iocValue?: string; iocType?: string; severity?: string; source?: string };
     const value = body.iocValue?.trim();
     const type = body.iocType;
@@ -56,13 +45,11 @@ export async function PUT(request: Request, context: RouteContext) {
 export async function DELETE(_request: Request, context: RouteContext) {
   const session = await getSession();
   if (!session) return NextResponse.json({ error: "Sign in required." }, { status: 401 });
+  if (session.role !== "Admin") return NextResponse.json({ error: "Admin access only." }, { status: 403 });
   const { id } = await context.params;
   const iocId = parseId(id);
   if (!iocId) return NextResponse.json({ error: "Invalid IOC ID." }, { status: 400 });
   try {
-    if (!(await authorizeIOC(iocId, session.userId, session.role))) {
-      return NextResponse.json({ error: "You can only delete IOCs linked to your own incidents." }, { status: 403 });
-    }
     const [result] = await getMySqlPool().execute<ResultSetHeader>(
       "DELETE FROM iocs WHERE ioc_id=?",
       [iocId]

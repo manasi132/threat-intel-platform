@@ -2,6 +2,7 @@
 
 import { Suspense, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
+import AppNav from "@/components/AppNav";
 
 type Incident = {
   incident_id: number;
@@ -98,9 +99,13 @@ function IncidentsContent() {
     setIocs(body.iocs || []);
   }
 
+  // eslint-disable-next-line react-hooks/set-state-in-effect
+
   useEffect(() => {
     let active = true;
 
+    // These loaders update state after their network requests resolve.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     Promise.all([loadIncidents(), loadIocs(), loadCorrelations()])
         .then(([loadedIncidents]) => {
         if (!active) return;
@@ -583,6 +588,8 @@ function IncidentsContent() {
 
 export default function Incidents() {
   return (
+    <>
+      <AppNav />
     <Suspense
       fallback={
         <main className="mx-auto min-h-screen max-w-7xl px-5 py-8 md:px-8">
@@ -592,5 +599,6 @@ export default function Incidents() {
     >
       <IncidentsContent />
     </Suspense>
+    </>
   );
 }

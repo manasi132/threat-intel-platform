@@ -16,7 +16,12 @@ export default function Dashboard() {
     catch (e) { setError(e instanceof Error ? e.message : "Dashboard could not be loaded."); }
     finally { setLoading(false); }
   }
-  useEffect(() => { void load(); }, []);
+  // eslint-disable-next-line react-hooks/set-state-in-effect
+  useEffect(() => {
+    // Start the data request when the dashboard mounts.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    void load();
+  }, []);
   const cards: [string, number][] = [["Open Incidents", data.summary.openIncidents], ["High-Risk IOCs", data.summary.highRiskIOCs], ["Affected Assets", data.summary.affectedAssets], ["Unread Alerts", data.summary.unreadAlerts]];
   return <main className="min-h-screen bg-slate-950 text-white"><AppNav /><section className="mx-auto max-w-7xl p-5 md:p-8">
     <div className="flex flex-wrap items-start justify-between gap-4"><div><h1 className="text-3xl font-bold">Security Overview</h1><p className="mt-2 text-slate-400">Dashboard values are loaded from MySQL.</p></div><button onClick={() => void load()} className="rounded-lg border border-slate-700 px-4 py-2 text-sm hover:bg-slate-800">Refresh</button></div>

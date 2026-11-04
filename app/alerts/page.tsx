@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import AppNav from "@/components/AppNav";
 
 type Alert = {
   alert_id: number;
@@ -25,7 +26,7 @@ export default function AlertsPage() {
   }, []);
 
   return (
-    <main className="min-h-screen bg-slate-950 p-6 text-slate-100">
+    <><AppNav /><main className="min-h-screen bg-slate-950 p-6 text-slate-100">
       <div className="mx-auto max-w-6xl">
         <h1 className="text-2xl font-bold">Security Alerts</h1>
         <p className="mt-2 text-sm text-slate-400">
@@ -63,5 +64,6 @@ export default function AlertsPage() {
         </div>
       </div>
     </main>
+    </>
   );
 }

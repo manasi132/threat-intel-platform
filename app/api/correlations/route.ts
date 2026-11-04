@@ -21,11 +21,11 @@ export async function GET() {
   }
 
   try {
-    const adminFilter =
-      session.role === "Admin" ? "WHERE inc.reported_by = ?" : "";
+    const analystFilter =
+      session.role === "Analyst" ? "WHERE inc.reported_by = ?" : "";
 
     const params =
-      session.role === "Admin" ? [session.userId] : [];
+      session.role === "Analyst" ? [session.userId] : [];
 
     const [rows] = await getMySqlPool().execute<RowDataPacket[]>(
       `
@@ -42,7 +42,7 @@ export async function GET() {
           ON i.ioc_id = ii.ioc_id
         JOIN incidents inc
           ON inc.incident_id = ii.incident_id
-        ${adminFilter}
+        ${analystFilter}
         ORDER BY ii.incident_id DESC, ii.ioc_id DESC
       `,
       params
@@ -116,7 +116,7 @@ export async function POST(request: Request) {
 
     const db = getMySqlPool();
 
-    if (session.role === "Admin") {
+    {
       const [allowed] = await db.execute<RowDataPacket[]>(
         `
           SELECT inc.incident_id

@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import AppNav from "@/components/AppNav";
 
 type Incident = { incident_id: number; title: string; severity: string; status: string; };
 type Alert = { alert_id: number; incident_id: number; alert_type: string; message: string; severity: string; is_read: number; incident_title: string; };
@@ -31,7 +32,8 @@ export default function Dashboard() {
   }, []);
 
   return (
-    <main className="mx-auto min-h-screen max-w-7xl px-5 py-8 md:px-8">
+    <><AppNav /><main className="min-h-screen">
+      <section className="mx-auto max-w-7xl px-5 py-8 md:px-8">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div><h1 className="text-2xl font-bold">Security Overview</h1><p className="mt-2 text-sm text-slate-400">Monitor incidents, IOCs, assets and security alerts.</p></div>
         <Link href="/alerts" className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold hover:bg-blue-500">View incidents</Link>
@@ -54,5 +56,6 @@ export default function Dashboard() {
         </section>
       </div>
     </main>
+    </>
   );
 }
