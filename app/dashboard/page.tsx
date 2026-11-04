@@ -33,7 +33,6 @@ export default function Dashboard() {
 
   return (
     <><AppNav /><main className="min-h-screen">
-      <AppNav />
       <section className="mx-auto max-w-7xl px-5 py-8 md:px-8">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div><h1 className="text-2xl font-bold">Security Overview</h1><p className="mt-2 text-sm text-slate-400">Monitor incidents, IOCs, assets and security alerts.</p></div>
