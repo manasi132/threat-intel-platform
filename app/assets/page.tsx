@@ -92,7 +92,7 @@ export default function AssetsPage() {
   }, []);
 
   return (
-    <main className="min-h-screen bg-slate-950 p-6 text-slate-100">
+    <><AppNav /><main className="min-h-screen bg-slate-950 p-6 text-slate-100">
       <div className="mx-auto max-w-6xl">
         <h1 className="text-2xl font-bold">Assets</h1>
 
@@ -165,6 +165,6 @@ export default function AssetsPage() {
           <p className="mt-4 text-sm text-slate-400">No assets found.</p>
         )}
       </div>
-    </main>
+    </main></>
   );
 }
