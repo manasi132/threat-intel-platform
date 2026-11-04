@@ -7,6 +7,7 @@ const field = "w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2.
 export default function IOCManagement() {
   const [iocs, setIocs] = useState<IOC[]>([]); const [q, setQ] = useState(""); const [open, setOpen] = useState(false); const [value, setValue] = useState(""); const [type, setType] = useState("IP"); const [severity, setSeverity] = useState("High"); const [source, setSource] = useState("Manual Entry"); const [loading, setLoading] = useState(true); const [saving, setSaving] = useState(false); const [error, setError] = useState(""); const [message, setMessage] = useState("");
   async function load() { setLoading(true); setError(""); try { const r = await fetch(`/api/iocs?q=${encodeURIComponent(q)}`, { cache: "no-store" }); const b = await r.json(); if (!r.ok) throw new Error(b.details || b.error); setIocs(b.iocs as IOC[]); } catch (e) { setError(e instanceof Error ? e.message : "Could not load IOCs."); } finally { setLoading(false); } }
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => {
     // Search changes initiate a fresh server request.
     // eslint-disable-next-line react-hooks/set-state-in-effect
